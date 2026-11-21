@@ -1,0 +1,88 @@
+
+name: PowerTools ResourcePack Build
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Resource Pack
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Files
+        run: |
+          set -e
+
+          test -f pack.mcmeta
+          test -f pack.png
+
+          test -f bucket.png
+          test -f water_bucket.png
+          test -f lava_bucket.png
+
+          test -f diamond_axe.png
+          test -f diamond_pickaxe.png
+          test -f diamond_shovel.png
+
+          test -f netherite_axe.png
+          test -f netherite_pickaxe.png
+          test -f netherite_shovel.png
+
+          echo "All resource pack files found!"
+
+      - name: Create Minecraft Folder Structure
+        run: |
+          set -e
+
+          mkdir -p build/assets/minecraft/textures/item
+
+          cp pack.mcmeta build/
+          cp pack.png build/
+
+          cp bucket.png build/assets/minecraft/textures/item/
+          cp water_bucket.png build/assets/minecraft/textures/item/
+          cp lava_bucket.png build/assets/minecraft/textures/item/
+
+          cp diamond_axe.png build/assets/minecraft/textures/item/
+          cp diamond_pickaxe.png build/assets/minecraft/textures/item/
+          cp diamond_shovel.png build/assets/minecraft/textures/item/
+
+          cp netherite_axe.png build/assets/minecraft/textures/item/
+          cp netherite_pickaxe.png build/assets/minecraft/textures/item/
+          cp netherite_shovel.png build/assets/minecraft/textures/item/
+
+      - name: Validate Resource Pack
+        run: |
+          set -e
+
+          test -f build/pack.mcmeta
+          test -f build/assets/minecraft/textures/item/diamond_pickaxe.png
+          test -f build/assets/minecraft/textures/item/bucket.png
+
+          echo "Resource pack structure is valid!"
+
+      - name: Create ZIP
+        run: |
+          cd build
+          zip -r ../PowerTools-Gold-ResourcePack-1.21.11.zip .
+          cd ..
+
+          unzip -l PowerTools-Gold-ResourcePack-1.21.11.zip
+
+      - name: Upload Resource Pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: PowerTools-Gold-ResourcePack
+          path: PowerTools-Gold-ResourcePack-1.21.11.zip
+          if-no-files-found: error
+          retention-days: 30
